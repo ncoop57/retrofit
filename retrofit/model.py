@@ -13,6 +13,8 @@ from transformers import AdamW, EncoderDecoderModel, AutoTokenizer
 class RetroFitModel(pl.LightningModule):
     def __init__(
         self,
+        encoder_tokenizer,
+        decoder_tokenizer,
         encoder_name,
         decoder_name,
         column,
@@ -21,9 +23,8 @@ class RetroFitModel(pl.LightningModule):
         freeze_decoder=True
     ):
         super().__init__()
-        self.encoder_tokenizer = AutoTokenizer.from_pretrained(encoder_name)#, model_max_length=512)
-        self.decoder_tokenizer = AutoTokenizer.from_pretrained(decoder_name)#, model_max_length=512)
-        self.decoder_tokenizer.pad_token = self.decoder_tokenizer.eos_token
+        self.encoder_tokenizer = encoder_tokenizer
+        self.decoder_tokenizer = decoder_tokenizer
         self.column = column
         self.weight_decay = weight_decay
         self.lr = lr
@@ -31,17 +32,19 @@ class RetroFitModel(pl.LightningModule):
         self.model = EncoderDecoderModel.from_encoder_decoder_pretrained(encoder_name, decoder_name)
         self.model.config.decoder_start_token_id = self.decoder_tokenizer.bos_token_id
         self.model.config.pad_token_id = self.decoder_tokenizer.pad_token_id
-        # self.model.config.vocab_size = self.model.config.decoder.vocab_size
+
+        self.save_hyperparameters()
 
     def training_step(self, batch, batch_idx):
-        # retrieved = batch["retrieved_examples"]
-        # retrieved = [self.encoder_tokenizer.eos_token.join(r) for r in retrieved]
-        # input_ids = self.encoder_tokenizer(retrieved, return_tensors="pt").input_ids
-        # labels = self.decoder_tokenizer(batch[self.column], return_tensors="pt").input_ids
-        # ["input_ids", "retrieved_input_ids", "attention_mask", "retrieved_attention_mask"]
         loss = self.model(input_ids=batch["retrieved_input_ids"], labels=batch["input_ids"]).loss
 
         self.log("trn_loss", loss, on_step=True, on_epoch=True, logger=True)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        loss = self.model(input_ids=batch["retrieved_input_ids"], labels=batch["input_ids"]).loss
+
+        self.log("val_loss", loss, on_epoch=True, logger=True)
         return loss
 
     def get_grouped_params(self, model, no_decay=["bias", "LayerNorm.weight"]):
@@ -58,9 +61,9 @@ class RetroFitModel(pl.LightningModule):
 
     def configure_optimizers(self):
         # Prepare the optimizer and learning rate scheduler
-        # param_model = self.model# if not self.freeze_decoder else self.model.encoder
-        # optimizer = AdamW(self.get_grouped_params(param_model), lr=self.lr)
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
+        param_model = self.model if not self.freeze_decoder else self.model.encoder
+        optimizer = AdamW(self.get_grouped_params(param_model), lr=self.lr)
+        # optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 
     def generate(self, retrieved_examples, skip_special_tokens=True):
