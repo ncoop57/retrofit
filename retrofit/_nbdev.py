@@ -3,7 +3,8 @@
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"RetroDataset": "00_data.ipynb",
-         "RetroFitModel": "01_model.ipynb"}
+         "get_grouped_params": "01_model.ipynb",
+         "RetroFitModelWrapper": "01_model.ipynb"}
 
 modules = ["data.py",
            "model.py"]

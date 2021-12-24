@@ -37,6 +37,7 @@ nb_path: "nbs/02_tutorial.ipynb"
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">wandb</span>
 
 <span class="kn">import</span> <span class="nn">pytorch_lightning</span> <span class="k">as</span> <span class="nn">pl</span>
 
@@ -45,8 +46,8 @@ nb_path: "nbs/02_tutorial.ipynb"
 <span class="kn">from</span> <span class="nn">pytorch_lightning.callbacks</span> <span class="k">import</span> <span class="n">EarlyStopping</span><span class="p">,</span> <span class="n">ModelCheckpoint</span><span class="p">,</span> <span class="n">TQDMProgressBar</span>
 <span class="kn">from</span> <span class="nn">pytorch_lightning.loggers</span> <span class="k">import</span> <span class="n">WandbLogger</span>
 <span class="kn">from</span> <span class="nn">retrofit.data</span> <span class="k">import</span> <span class="n">RetroDataset</span>
-<span class="kn">from</span> <span class="nn">retrofit.model</span> <span class="k">import</span> <span class="n">RetroFitModel</span>
-<span class="kn">from</span> <span class="nn">transformers</span> <span class="k">import</span> <span class="n">AutoTokenizer</span>
+<span class="kn">from</span> <span class="nn">retrofit.model</span> <span class="k">import</span> <span class="n">RetroFitModelWrapper</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="k">import</span> <span class="n">AutoTokenizer</span><span class="p">,</span> <span class="n">EncoderDecoderModel</span>
 </pre></div>
 
     </div>
@@ -80,12 +81,12 @@ nb_path: "nbs/02_tutorial.ipynb"
     <span class="n">k</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
     <span class="n">n_perc</span><span class="o">=</span><span class="mi">1</span>
 <span class="p">)</span>
-<span class="n">model</span> <span class="o">=</span> <span class="n">RetroFitModel</span><span class="p">(</span>
-    <span class="n">encoder_tokenizer</span><span class="p">,</span>
-    <span class="n">decoder_tokenizer</span><span class="p">,</span>
-    <span class="n">encoder_name</span><span class="p">,</span>
-    <span class="n">decoder_name</span><span class="p">,</span>
-    <span class="n">column</span><span class="p">,</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">EncoderDecoderModel</span><span class="o">.</span><span class="n">from_encoder_decoder_pretrained</span><span class="p">(</span><span class="n">encoder_name</span><span class="p">,</span> <span class="n">decoder_name</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">decoder_start_token_id</span> <span class="o">=</span> <span class="n">decoder_tokenizer</span><span class="o">.</span><span class="n">bos_token_id</span>
+<span class="n">model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">pad_token_id</span> <span class="o">=</span> <span class="n">decoder_tokenizer</span><span class="o">.</span><span class="n">pad_token_id</span>
+<span class="n">retro_model</span> <span class="o">=</span> <span class="n">RetroFitModelWrapper</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">,</span>
     <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
     <span class="n">lr</span><span class="o">=</span><span class="mf">5e-4</span><span class="p">,</span>
     <span class="n">freeze_decoder</span><span class="o">=</span><span class="kc">True</span>
@@ -93,6 +94,24 @@ nb_path: "nbs/02_tutorial.ipynb"
 </pre></div>
 
     </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Some weights of the model checkpoint at distilbert-base-uncased were not used when initializing DistilBertModel: [&#39;vocab_layer_norm.bias&#39;, &#39;vocab_layer_norm.weight&#39;, &#39;vocab_transform.weight&#39;, &#39;vocab_transform.bias&#39;, &#39;vocab_projector.weight&#39;, &#39;vocab_projector.bias&#39;]
+- This IS expected if you are initializing DistilBertModel from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing DistilBertModel from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+Some weights of GPT2LMHeadModel were not initialized from the model checkpoint at gpt2 and are newly initialized: [&#39;h.2.crossattention.c_attn.weight&#39;, &#39;h.7.crossattention.c_attn.weight&#39;, &#39;h.0.crossattention.c_attn.weight&#39;, &#39;h.8.crossattention.masked_bias&#39;, &#39;h.9.ln_cross_attn.weight&#39;, &#39;h.8.crossattention.q_attn.weight&#39;, &#39;h.6.crossattention.c_proj.weight&#39;, &#39;h.11.crossattention.c_proj.bias&#39;, &#39;h.9.crossattention.c_proj.bias&#39;, &#39;h.3.crossattention.c_proj.bias&#39;, &#39;h.8.crossattention.c_proj.bias&#39;, &#39;h.2.crossattention.c_proj.weight&#39;, &#39;h.3.crossattention.c_proj.weight&#39;, &#39;h.11.ln_cross_attn.weight&#39;, &#39;h.1.crossattention.bias&#39;, &#39;h.4.crossattention.c_attn.weight&#39;, &#39;h.7.crossattention.q_attn.weight&#39;, &#39;h.2.crossattention.c_proj.bias&#39;, &#39;h.10.crossattention.bias&#39;, &#39;h.7.crossattention.masked_bias&#39;, &#39;h.1.crossattention.masked_bias&#39;, &#39;h.7.crossattention.c_proj.bias&#39;, &#39;h.0.ln_cross_attn.weight&#39;, &#39;h.6.crossattention.c_attn.weight&#39;, &#39;h.1.ln_cross_attn.weight&#39;, &#39;h.2.crossattention.q_attn.weight&#39;, &#39;h.4.crossattention.masked_bias&#39;, &#39;h.6.crossattention.masked_bias&#39;, &#39;h.11.crossattention.c_attn.weight&#39;, &#39;h.8.crossattention.c_attn.weight&#39;, &#39;h.10.ln_cross_attn.weight&#39;, &#39;h.8.crossattention.c_proj.weight&#39;, &#39;h.10.crossattention.masked_bias&#39;, &#39;h.5.crossattention.q_attn.weight&#39;, &#39;h.0.crossattention.masked_bias&#39;, &#39;h.0.crossattention.c_proj.weight&#39;, &#39;h.10.crossattention.c_attn.weight&#39;, &#39;h.4.crossattention.q_attn.weight&#39;, &#39;h.8.ln_cross_attn.weight&#39;, &#39;h.5.crossattention.c_attn.weight&#39;, &#39;h.5.crossattention.masked_bias&#39;, &#39;h.7.ln_cross_attn.weight&#39;, &#39;h.9.crossattention.c_attn.weight&#39;, &#39;h.0.crossattention.bias&#39;, &#39;h.3.crossattention.q_attn.weight&#39;, &#39;h.6.ln_cross_attn.weight&#39;, &#39;h.1.crossattention.c_proj.bias&#39;, &#39;h.6.crossattention.q_attn.weight&#39;, &#39;h.7.crossattention.c_proj.weight&#39;, &#39;h.11.crossattention.c_proj.weight&#39;, &#39;h.9.crossattention.c_proj.weight&#39;, &#39;h.7.crossattention.bias&#39;, &#39;h.3.crossattention.c_attn.weight&#39;, &#39;h.3.crossattention.bias&#39;, &#39;h.0.crossattention.c_proj.bias&#39;, &#39;h.2.crossattention.bias&#39;, &#39;h.2.crossattention.masked_bias&#39;, &#39;h.11.crossattention.bias&#39;, &#39;h.10.crossattention.c_proj.bias&#39;, &#39;h.10.crossattention.c_proj.weight&#39;, &#39;h.5.crossattention.c_proj.bias&#39;, &#39;h.6.crossattention.bias&#39;, &#39;h.10.crossattention.q_attn.weight&#39;, &#39;h.11.crossattention.q_attn.weight&#39;, &#39;h.9.crossattention.masked_bias&#39;, &#39;h.11.crossattention.masked_bias&#39;, &#39;h.4.ln_cross_attn.weight&#39;, &#39;h.4.crossattention.c_proj.bias&#39;, &#39;h.4.crossattention.c_proj.weight&#39;, &#39;h.1.crossattention.c_attn.weight&#39;, &#39;h.9.crossattention.q_attn.weight&#39;, &#39;h.2.ln_cross_attn.weight&#39;, &#39;h.5.ln_cross_attn.weight&#39;, &#39;h.3.crossattention.masked_bias&#39;, &#39;h.1.crossattention.q_attn.weight&#39;, &#39;h.5.crossattention.c_proj.weight&#39;, &#39;h.1.crossattention.c_proj.weight&#39;, &#39;h.9.crossattention.bias&#39;, &#39;h.8.crossattention.bias&#39;, &#39;h.0.crossattention.q_attn.weight&#39;, &#39;h.5.crossattention.bias&#39;, &#39;h.4.crossattention.bias&#39;, &#39;h.6.crossattention.c_proj.bias&#39;, &#39;h.3.ln_cross_attn.weight&#39;]
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -152,14 +171,14 @@ nb_path: "nbs/02_tutorial.ipynb"
     <span class="c1"># tracker.stop()</span>
 
     <span class="c1"># save the best model to wandb</span>
-    <span class="c1"># best_model_path = checkpoint_callback.best_model_path</span>
-    <span class="c1"># if best_model_path is not None:</span>
-    <span class="c1">#     wandb.save(best_model_path)</span>
+    <span class="n">best_model_path</span> <span class="o">=</span> <span class="n">checkpoint_callback</span><span class="o">.</span><span class="n">best_model_path</span>
+    <span class="k">if</span> <span class="n">best_model_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">wandb</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">best_model_path</span><span class="p">)</span>
 
     <span class="c1"># # save the emissions csv file</span>
     <span class="c1"># wandb.save(str(output_dir.parent.parent / &quot;emissions.csv&quot;))</span>
 
-    <span class="k">return</span> <span class="n">checkpoint_callback</span><span class="o">.</span><span class="n">best_model_path</span>
+    <span class="k">return</span> <span class="n">best_model_path</span>
 </pre></div>
 
     </div>
@@ -179,7 +198,7 @@ nb_path: "nbs/02_tutorial.ipynb"
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="n">out_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/workspace/retrofit/data/output/&quot;</span><span class="p">)</span>
 <span class="n">best_model_path</span> <span class="o">=</span> <span class="n">train_model</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">,</span>
+    <span class="n">retro_model</span><span class="p">,</span>
     <span class="n">retro_ds</span><span class="p">,</span>
     <span class="n">num_epochs</span><span class="o">=</span><span class="n">num_epochs</span><span class="p">,</span>
     <span class="n">output_dir</span><span class="o">=</span><span class="n">out_dir</span> <span class="o">/</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span>
@@ -189,6 +208,65 @@ nb_path: "nbs/02_tutorial.ipynb"
 </pre></div>
 
     </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>Using 16bit native Automatic Mixed Precision (AMP)
+GPU available: True, used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+Reusing dataset code_search_net (/root/.cache/huggingface/datasets/code_search_net/python/1.0.0/80a244ab541c6b2125350b764dc5c2b715f65f00de7a56107a28915fac173a27)
+Reusing dataset code_search_net (/root/.cache/huggingface/datasets/code_search_net/python/1.0.0/80a244ab541c6b2125350b764dc5c2b715f65f00de7a56107a28915fac173a27)
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+Failed to detect the name of this notebook, you can set it manually with the WANDB_NOTEBOOK_NAME environment variable to enable code saving.
+<span class="ansi-blue-intense-fg ansi-bold">wandb</span>: Currently logged in as: <span class="ansi-yellow-fg">natedog</span> (use `wandb login --relogin` to force relogin)
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea ">
+
+                    Syncing run <strong><a href="https://wandb.ai/natedog/Retrofit/runs/2nkmicpv" target="_blank">test</a></strong> to <a href="https://wandb.ai/natedog/Retrofit" target="_blank">Weights & Biases</a> (<a href="https://docs.wandb.com/integrations/jupyter.html" target="_blank">docs</a>).<br/>
+
+                
+</div>
+
+</div>
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+  | Name  | Type                | Params
+----------------------------------------------
+0 | model | EncoderDecoderModel | 219 M 
+----------------------------------------------
+219 M     Trainable params
+0         Non-trainable params
+219 M     Total params
+438.339   Total estimated model params size (MB)
+/usr/local/lib/python3.8/dist-packages/pytorch_lightning/callbacks/model_checkpoint.py:617: UserWarning: Checkpoint directory /workspace/retrofit/data/output/model/checkpoints exists and is not empty.
+  rank_zero_warn(f&#34;Checkpoint directory {dirpath} exists and is not empty.&#34;)
+/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/data_loading.py:110: UserWarning: The dataloader, val_dataloader 0, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 32 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  rank_zero_warn(
+/usr/local/lib/python3.8/dist-packages/transformers/models/encoder_decoder/modeling_encoder_decoder.py:527: FutureWarning: Version v4.12.0 introduces a better way to train encoder-decoder models by computing the loss inside the encoder-decoder framework rather than in the decoder itself. You may observe training discrepancies if fine-tuning a model trained with versions anterior to 4.12.0. The decoder_input_ids are now created based on the labels, no need to pass them yourself anymore.
+  warnings.warn(DEPRECATION_WARNING, FutureWarning)
+/usr/local/lib/python3.8/dist-packages/pytorch_lightning/trainer/data_loading.py:110: UserWarning: The dataloader, train_dataloader, does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` (try 32 which is the number of cpus on this machine) in the `DataLoader` init to improve performance.
+  rank_zero_warn(
+<span class="ansi-blue-intense-fg ansi-bold">wandb</span>: <span class="ansi-yellow-fg">WARNING</span> Saving files without folders. If you want to preserve sub directories pass base_path to wandb.save, i.e. wandb.save(&#34;/mnt/folder/file.h5&#34;, base_path=&#34;/mnt&#34;)
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 
