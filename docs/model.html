@@ -47,7 +47,162 @@ nb_path: "nbs/01_model.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="get_grouped_params" class="doc_header"><code>get_grouped_params</code><a href="https://github.com/ncoop57/retrofit/tree/master/retrofit/model.py#L12" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_grouped_params</code>(<strong><code>model</code></strong>, <strong><code>weight_decay</code></strong>, <strong><code>no_decay</code></strong>=<em><code>['bias', 'LayerNorm.weight']</code></em>)</p>
+<h2 id="RetroEncoder" class="doc_header"><code>class</code> <code>RetroEncoder</code><a href="https://github.com/ncoop57/retrofit/tree/master/retrofit/model.py#L16" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>RetroEncoder</code>(<strong><code>d_model</code></strong>:<code>int</code>, <strong><code>nhead</code></strong>:<code>int</code>, <strong><code>d_hid</code></strong>:<code>int</code>, <strong><code>nlayers</code></strong>:<code>int</code>, <strong><code>dropout</code></strong>:<code>float</code>=<em><code>0.5</code></em>) :: <code>Module</code></p>
+</blockquote>
+<p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super(Model, self).__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<p>:ivar training: Boolean represents whether this module is in training or
+                evaluation mode.
+:vartype training: bool</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">encoder</span> <span class="o">=</span> <span class="n">RetroEncoder</span><span class="p">(</span><span class="n">d_model</span><span class="o">=</span><span class="mi">768</span><span class="p">,</span> <span class="n">nhead</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">d_hid</span><span class="o">=</span><span class="mi">768</span><span class="p">,</span> <span class="n">nlayers</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">768</span><span class="p">)</span>
+<span class="c1"># test_mask = torch.ones(1, 10)</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">768</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h2 id="RetroFitModel" class="doc_header"><code>class</code> <code>RetroFitModel</code><a href="https://github.com/ncoop57/retrofit/tree/master/retrofit/model.py#L42" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>RetroFitModel</code>(<strong><code>encoder_model</code></strong>:<code>Module</code>, <strong><code>decoder_model_name</code></strong>:<code>str</code>) :: <code>Module</code></p>
+</blockquote>
+<p>Base class for all neural network modules.</p>
+<p>Your models should also subclass this class.</p>
+<p>Modules can also contain other Modules, allowing to nest them in
+a tree structure. You can assign the submodules as regular attributes::</p>
+
+<pre><code>import torch.nn as nn
+import torch.nn.functional as F
+
+class Model(nn.Module):
+    def __init__(self):
+        super(Model, self).__init__()
+        self.conv1 = nn.Conv2d(1, 20, 5)
+        self.conv2 = nn.Conv2d(20, 20, 5)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        return F.relu(self.conv2(x))
+
+</code></pre>
+<p>Submodules assigned in this way will be registered, and will have their
+parameters converted too when you call :meth:<code>to</code>, etc.</p>
+<p>:ivar training: Boolean represents whether this module is in training or
+                evaluation mode.
+:vartype training: bool</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">retro_model</span> <span class="o">=</span> <span class="n">RetroFitModel</span><span class="p">(</span><span class="n">encoder_model</span><span class="o">=</span><span class="n">encoder</span><span class="p">,</span> <span class="n">decoder_model_name</span><span class="o">=</span><span class="s1">&#39;gpt2&#39;</span><span class="p">)</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">768</span><span class="p">)</span>
+<span class="n">test_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">test_labels</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">retro_model</span><span class="o">.</span><span class="n">decoder_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">retro_model</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">test_labels</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">loss</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">()</span>
+<span class="k">assert</span> <span class="n">loss</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+<span class="k">assert</span> <span class="n">retro_model</span><span class="o">.</span><span class="n">decoder_model</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">vocab_size</span> <span class="o">==</span> <span class="mi">50257</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="get_grouped_params" class="doc_header"><code>get_grouped_params</code><a href="https://github.com/ncoop57/retrofit/tree/master/retrofit/model.py#L68" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_grouped_params</code>(<strong><code>model</code></strong>, <strong><code>weight_decay</code></strong>, <strong><code>no_decay</code></strong>=<em><code>['bias', 'LayerNorm.weight']</code></em>)</p>
 </blockquote>
 
 </div>
@@ -70,6 +225,26 @@ nb_path: "nbs/01_model.ipynb"
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">weight_decayed_params</span><span class="p">,</span> <span class="n">non_weight_decayed_params</span> <span class="o">=</span> <span class="n">get_grouped_params</span><span class="p">(</span><span class="n">retro_model</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">weight_decayed_params</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_weight_decayed_params</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 <div class="output_wrapper">
 <div class="output">
@@ -78,7 +253,7 @@ nb_path: "nbs/01_model.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h2 id="RetroFitModelWrapper" class="doc_header"><code>class</code> <code>RetroFitModelWrapper</code><a href="https://github.com/ncoop57/retrofit/tree/master/retrofit/model.py#L25" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>RetroFitModelWrapper</code>(<strong><code>model</code></strong>, <strong><code>weight_decay</code></strong>=<em><code>0.1</code></em>, <strong><code>lr</code></strong>=<em><code>0.0005</code></em>, <strong><code>num_warmup_steps</code></strong>=<em><code>2000</code></em>, <strong><code>freeze_decoder</code></strong>=<em><code>True</code></em>) :: <code>LightningModule</code></p>
+<h2 id="RetroFitModelWrapper" class="doc_header"><code>class</code> <code>RetroFitModelWrapper</code><a href="https://github.com/ncoop57/retrofit/tree/master/retrofit/model.py#L81" class="source_link" style="float:right">[source]</a></h2><blockquote><p><code>RetroFitModelWrapper</code>(<strong><code>model</code></strong>, <strong><code>weight_decay</code></strong>=<em><code>0.1</code></em>, <strong><code>lr</code></strong>=<em><code>0.0005</code></em>, <strong><code>num_warmup_steps</code></strong>=<em><code>2000</code></em>, <strong><code>freeze_decoder</code></strong>=<em><code>True</code></em>) :: <code>LightningModule</code></p>
 </blockquote>
 <p>Hooks to be used in LightningModule.</p>
 

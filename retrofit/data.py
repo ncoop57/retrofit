@@ -109,6 +109,6 @@ class RetroDataset(pl.LightningDataModule):
 
     def get_nearest_neighbors(self, example, k=10):
         embed = self.model.encode(example)
-        _, retrieved_examples = self.knowledge_ds.get_nearest_examples("embeddings", embed, k=k)
+        _, retrieved_examples = self.knowledge_ds.get_nearest_examples("embedding", embed, k=k)
 
         return retrieved_examples[self.column]
